@@ -1,0 +1,117 @@
+@extends('layouts.app')
+
+@section('title', 'Edit Moodboard - ' . $moodboard->title)
+
+@section('content')
+<div class="max-w-2xl mx-auto bg-white rounded-2xl shadow-xl p-8">
+    <h1 class="text-3xl font-bold text-gray-800 mb-6">Edit Moodboard</h1>
+
+    <form action="{{ route('moodboards.update', $moodboard) }}" method="POST" enctype="multipart/form-data">
+        @csrf
+        @method('PUT')
+
+        <!-- Title -->
+        <div class="mb-4">
+            <label for="title" class="block text-gray-700 font-semibold mb-2">Title</label>
+            <input type="text" id="title" name="title" value="{{ old('title', $moodboard->title) }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600" required>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-4">
+            <label for="description" class="block text-gray-700 font-semibold mb-2">Description</label>
+            <textarea id="description" name="description" rows="4" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600" required>{{ old('description', $moodboard->description) }}</textarea>
+        </div>
+
+        <!-- Image -->
+        <div class="mb-4">
+            <label for="image" class="block text-gray-700 font-semibold mb-2">Image</label>
+            <input type="file" id="image" name="image" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600">
+            @if ($moodboard->image_path)
+                <div class="mt-4">
+                    <p class="text-sm text-gray-600 mb-2"><i>*Gambar Sebelumnya</i></p>
+                    <img src="{{ asset('storage/' . $moodboard->image_path) }}" alt="Current Image" class="w-48 h-auto rounded-md shadow">
+                </div>
+            @else
+                <div class="mt-4">
+                    <p class="text-sm text-gray-600 mb-2"><i>*Tidak ada gambar sebelumnya</i></p>
+                    <img src="/storage/poster/no-image.jpg" alt="No Image" class="w-48 h-auto rounded-md shadow">
+                </div>
+            @endif
+        </div>
+
+        <!-- Creator -->
+        <div class="mb-4">
+            <label for="creator" class="block text-gray-700 font-semibold mb-2">Creator</label>
+            <input type="text" id="creator" name="creator" value="{{ old('creator', $moodboard->creator) }}" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600" required>
+        </div>
+
+        <!-- Theme -->
+        <div class="mb-4">
+            <label for="theme" class="block text-gray-700 font-semibold mb-2">Theme</label>
+            <select id="theme" name="theme" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-600">
+                @foreach($themes as $theme)
+                    <option value="{{ $theme }}" {{ old('theme', $moodboard->theme) == $theme ? 'selected' : '' }}>
+                        {{ ucfirst($theme) }}
+                    </option>
+                @endforeach
+            </select>
+        </div>
+
+        <!-- Color Palette -->
+        <div class="mb-6">
+            <label class="block text-gray-700 font-semibold mb-2">Color Palette</label>
+            <div class="grid grid-cols-3 gap-4">
+                @for($i = 1; $i <= 3; $i++)
+                @php $colorKey = 'color_key_' . $i; @endphp
+                <div>
+                    <label class="block text-xs text-gray-600 mb-2">Color {{ $i }}</label>
+                    <input type="color"
+                           id="color_picker_{{ $i }}"
+                           value="{{ old($colorKey, $moodboard->$colorKey) }}"
+                           class="w-full h-12 rounded-lg cursor-pointer border-2 border-gray-300">
+                    <input type="text"
+                           name="{{ $colorKey }}"
+                           id="color_text_{{ $i }}"
+                           value="{{ old($colorKey, $moodboard->$colorKey) }}"
+                           class="w-full mt-2 px-2 py-1 text-xs border border-gray-300 rounded text-center font-mono"
+                           pattern="^#[0-9A-Fa-f]{6}$"
+                           required>
+                </div>
+                @endfor
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-3">
+            <a href="{{ route('moodboards.index') }}" class="flex-1 px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors font-semibold text-center">
+                Cancel
+            </a>
+            <button type="submit" class="flex-1 px-6 py-3 bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-lg hover:shadow-lg transition-all duration-300 font-semibold text-center">
+                Update Moodboard
+            </button>
+        </div>
+    </form>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    for (let i = 1; i <= 3; i++) {
+        const colorPicker = document.getElementById(`color_picker_${i}`);
+        const colorText = document.getElementById(`color_text_${i}`);
+
+        colorPicker.addEventListener('input', (event) => {
+            colorText.value = event.target.value;
+        });
+
+        colorText.addEventListener('input', (event) => {
+            // Pastikan input text memiliki '#' di depan
+            let value = event.target.value;
+            if (value.length > 0 && value[0] !== '#') {
+                value = '#' + value;
+            }
+            colorPicker.value = value;
+        });
+    }
+});
+</script>
+@endsection
