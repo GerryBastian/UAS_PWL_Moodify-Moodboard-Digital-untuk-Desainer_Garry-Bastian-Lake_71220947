@@ -24,7 +24,9 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot()
     {
-        error_reporting(E_ALL ^ E_DEPRECATED);
+        if (config('app.env') === 'production') {
+            error_reporting(E_ALL ^ E_DEPRECATED);
+        }
         \Illuminate\Support\Facades\Schema::defaultStringLength(191);
     }
 }
